@@ -1,0 +1,36 @@
+name: Compilar Aplicación Python
+
+on:
+  push:
+    branches: [ "main" ] # Se ejecuta cuando subes cambios a la rama main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Puedes usar windows-latest si necesitas un .exe obligatorio
+
+    steps:
+    - name: Descargar código del repositorio
+      uses: actions/checkout@v4
+
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        # Si tienes un archivo de requerimientos, descomenta la siguiente línea:
+        # pip install -r requirements.txt
+
+    - name: Compilar con PyInstaller
+      run: |
+        # Esto compila ambos archivos en un solo paquete ejecutable basado en main.py
+        pyinstaller --onefile main.py server.py
+
+    - name: Guardar el archivo compilado
+      uses: actions/upload-artifact@v4
+      with:
+        name: aplicacion-compilada
+        path: dist/
