@@ -1,0 +1,46 @@
+name: Compilar APK para Android (Zebra)
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Descargar código
+      uses: actions/checkout@v4
+
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Instalar dependencias del sistema
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ccache git libffi-dev SDL2 SDL2_image SDL2_ttf SDL2_mixer pkg-config autoconf automake libtool zip unzip openjdk-17-jdk
+
+    - name: Instalar Buildozer y Cython
+      run: |
+        pip install --upgrade pip
+        pip install buildozer cython virtualenv
+
+    - name: Generar archivo de configuración Buildozer
+      run: |
+        # Esto genera un archivo buildozer.spec base si no existe
+        if [ ! -f buildozer.spec ]; then
+          buildozer init
+        fi
+
+    - name: Compilar APK (Modo Debug)
+      run: |
+        # Ejecuta la compilación automática en la nube
+        buildozer android debug
+
+    - name: Subir instalable APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: Zebra-Android-APK
+        path: bin/*.apk
